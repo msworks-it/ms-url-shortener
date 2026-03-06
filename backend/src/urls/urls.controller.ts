@@ -4,8 +4,8 @@ import { CreateUrlDTO } from './dto/create-url.dto';
 @Controller('urls')
 export class UrlsController {
   @Get()
-  findAll(@Query('id') id: string) {
-    return [{ id }];
+  getUrl(@Query('slug') slug: string) {
+    return slug;
   }
 
   @Get(':id')

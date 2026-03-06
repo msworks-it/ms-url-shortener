@@ -26,6 +26,9 @@
     "@nestjs/platform-fastify": "^11.1.15",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
+    "@thallesp/nestjs-better-auth": "^2.4.0",
+    "better-auth": "^1.5.4",
+    "pg": "^8.20.0",
     "prisma": "^7.4.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"

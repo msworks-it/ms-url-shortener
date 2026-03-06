@@ -9,7 +9,10 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: true }),
-    { abortOnError: false },
+    {
+      abortOnError: false,
+      bodyParser: false,
+    },
   );
   await app.listen(process.env.PORT ?? 5000);
 }
