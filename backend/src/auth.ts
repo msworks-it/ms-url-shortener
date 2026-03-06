@@ -10,4 +10,5 @@ export const auth = betterAuth({
   }),
   appName: 'backend',
   plugins: [],
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:5000',
 });
