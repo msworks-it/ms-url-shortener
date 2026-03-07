@@ -23,7 +23,7 @@ model User {
 
   sessions      Session[]
   accounts      Account[]
-  urls          Url[]
+  urls          ShortUrl[]
 
   @@unique([email])
   @@map("user")
@@ -77,28 +77,28 @@ model Verification {
   @@map("verification")
 }
 
-model Url {
-  id        String   @id
-  targetUrl String
-  slug      String   @unique
-  expiration DateTime?
-  password  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model ShortUrl {
+  id          String   @id @default(uuid())
+  targetUrl   String
+  slug        String   @unique
+  expiration  DateTime?
+  password    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  clicks    Click[]
+  clicks      Click[]
   
   @@index([slug])
   @@map("url")
 }
 
 model Click {
-  id        String   @id
+  id        String   @id @default(uuid())
   urlId     String
-  url       Url      @relation(fields: [urlId], references: [id], onDelete: Cascade)
+  url       ShortUrl      @relation(fields: [urlId], references: [id], onDelete: Cascade)
   metadata  Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
