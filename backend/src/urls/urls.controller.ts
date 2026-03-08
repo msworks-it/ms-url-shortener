@@ -1,7 +1,21 @@
-import { Controller, Get, Param, Post, Body, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Body,
+  Put,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  ValidationPipe,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { CreateUrlDTO } from './dto/create-url.dto';
 import { UrlService } from './urls.service';
 import { Session, type UserSession } from '@thallesp/nestjs-better-auth';
+import type { UUID } from 'crypto';
 
 @Controller('urls')
 export class UrlController {
@@ -14,11 +28,18 @@ export class UrlController {
 
   @Get(':slug')
   findTarget(@Param('slug') slug: string) {
-    return this.urlService.getTarget(slug);
+    try {
+      return this.urlService.getTarget(slug);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
   @Post()
-  create(@Session() user: UserSession, @Body() createUrlDto: CreateUrlDTO) {
+  create(
+    @Session() user: UserSession,
+    @Body(new ValidationPipe()) createUrlDto: CreateUrlDTO,
+  ) {
     return this.urlService.createTarget(user.user.id, createUrlDto);
   }
 
@@ -26,10 +47,22 @@ export class UrlController {
   update(
     @Session() user: UserSession,
     @Param('slug') slug: string,
-    @Body() updateUrlDto: CreateUrlDTO,
+    @Body(new ValidationPipe()) updateUrlDto: CreateUrlDTO,
   ) {
-    return this.urlService.updateTarget(slug, user.user.id, updateUrlDto);
+    try {
+      return this.urlService.updateTarget(slug, user.user.id, updateUrlDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
-  // devo continuare a giocarci un pochino dai...
+  @Delete()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id', new ParseUUIDPipe()) id: UUID) {
+    try {
+      return this.urlService.deleteTarget(id);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
 }
