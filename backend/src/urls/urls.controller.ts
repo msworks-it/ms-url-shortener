@@ -11,6 +11,7 @@ import {
   NotFoundException,
   ValidationPipe,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { CreateUrlDTO } from './dto/create-url.dto';
 import { UrlService } from './urls.service';
@@ -22,8 +23,12 @@ export class UrlController {
   constructor(private readonly urlService: UrlService) {}
 
   @Get()
-  allUrls() {
-    return [];
+  allUrls(@Query('userId', new ParseUUIDPipe()) userId: UUID) {
+    try {
+      return this.urlService.getAllUrls(userId); // insert pagination
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
   @Get(':slug')

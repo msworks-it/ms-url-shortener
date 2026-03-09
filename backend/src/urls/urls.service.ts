@@ -12,6 +12,18 @@ export class UrlService {
     private readonly redisService: RedisService,
   ) {}
 
+  async getAllUrls(userId: UUID): Promise<ShortUrl[]> {
+    const urls = await this.prismaService.shortUrl.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    if (!urls) throw new Error(`${userId} has no urls saved`);
+
+    return urls;
+  }
+
   async getTarget(slug: string): Promise<ShortUrl | null> {
     const cachedValue = await this.redisService.get<ShortUrl>(slug);
     if (cachedValue) return cachedValue;
