@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { RedisClientType } from 'redis';
 
+const MIN_TTL = 7200;
+
 @Injectable()
 export class RedisService {
   constructor(
@@ -8,14 +10,16 @@ export class RedisService {
     private readonly client: RedisClientType,
   ) {}
 
-  async set(key: string, value: unknown, ttl?: number) {
+  async set<T>(key: string, value: unknown, ttl?: number): Promise<T | null> {
     const serialized = JSON.stringify(value);
 
-    if (ttl) {
-      await this.client.set(key, serialized, { EX: ttl });
-    } else {
-      await this.client.set(key, serialized);
-    }
+    ttl = MIN_TTL ?? undefined;
+
+    if (!ttl) return (await this.client.set(key, serialized)) as T;
+
+    return (await this.client.set(key, serialized, {
+      ...(ttl ? { expiration: { type: 'EX', value: ttl } } : {}),
+    })) as T;
   }
 
   async get<T>(key: string): Promise<T | null> {
@@ -25,5 +29,15 @@ export class RedisService {
 
   async del(key: string) {
     await this.client.del(key);
+  }
+
+  async getOrSet<T>(
+    key: string,
+    value: unknown,
+    ttl?: number,
+  ): Promise<T | null> {
+    const cached = await this.get<T>(key);
+    if (!cached) return await this.set<T>(key, value, ttl);
+    return cached;
   }
 }
