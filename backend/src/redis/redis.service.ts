@@ -27,6 +27,26 @@ export class RedisService {
     return raw ? (JSON.parse(raw) as T) : null;
   }
 
+  /**
+   * @param pattern - The pattern to match keys against (e.g. "test-slug:*")
+   */
+  async getKeyParams(pattern: string): Promise<string[]> {
+    let cursor = 0;
+    const results: string[] = [];
+
+    do {
+      const raw = await this.client.scan(cursor.toString(), {
+        MATCH: pattern,
+        COUNT: 1000,
+      });
+
+      cursor = Number(raw.cursor);
+      results.push(...raw.keys);
+    } while (cursor != 0);
+
+    return results[0].split(':');
+  }
+
   async del(key: string) {
     await this.client.del(key);
   }

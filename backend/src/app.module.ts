@@ -7,7 +7,12 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 
 @Module({
-  imports: [UrlsModule, AuthModule.forRoot({ auth }), PrismaModule, RedisModule],
+  imports: [
+    UrlsModule,
+    AuthModule.forRoot({ auth }),
+    PrismaModule,
+    RedisModule,
+  ],
   controllers: [],
   providers: [PrismaService],
 })

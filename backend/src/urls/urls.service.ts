@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ShortUrl } from '@prisma/client';
 import { CreateUrlDTO } from './dto/create-url.dto';
-import { UUID } from 'crypto';
+import { hash, UUID } from 'crypto';
 import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
@@ -24,12 +24,36 @@ export class UrlService {
     return urls;
   }
 
-  async getTarget(slug: string): Promise<ShortUrl | null> {
+  SHA256(password?: string) {
+    const hashedPassword = password ? hash('sha256', password) : undefined;
+    return hashedPassword;
+  }
+
+  async getTarget(
+    slug: string,
+    opts?: {
+      includePassword: boolean;
+    },
+  ): Promise<ShortUrl | null> {
     const cachedValue = await this.redisService.get<ShortUrl>(slug);
-    if (cachedValue) return cachedValue;
+    if (cachedValue)
+      return {
+        ...cachedValue,
+        password: opts?.includePassword ? cachedValue.password : null,
+      };
 
     const target = await this.prismaService.shortUrl.findFirst({
       where: { slug },
+      select: {
+        id: true,
+        slug: true,
+        targetUrl: true,
+        expiration: true,
+        userId: true,
+        password: opts?.includePassword ?? false,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     if (!target) throw new Error(`${slug} not found!`);
 
@@ -38,13 +62,28 @@ export class UrlService {
     return target;
   }
 
+  async getAccess(slug: string, password?: string): Promise<ShortUrl> {
+    const hashed = this.SHA256(password);
+
+    const targetData = await this.getTarget(slug, { includePassword: true });
+    if (!targetData) throw new Error(`${slug} not found!`);
+    if (!targetData.password) return targetData;
+
+    if (targetData.password && !password) throw new UnauthorizedException();
+    if (targetData.password != hashed) throw new UnauthorizedException();
+
+    return targetData;
+  }
+
   async createTarget(userId: string, data: CreateUrlDTO): Promise<ShortUrl> {
+    const hashedPassword = this.SHA256(data.password);
+
     const created = await this.prismaService.shortUrl.create({
       data: {
         userId,
         slug: data.slug,
         targetUrl: data.target,
-        ...(data.password && { password: data.password }),
+        ...(data.password && { password: hashedPassword }),
         ...(data.expiration && { expiration: data.expiration }),
       },
     });

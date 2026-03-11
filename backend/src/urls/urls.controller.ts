@@ -17,6 +17,7 @@ import { CreateUrlDTO } from './dto/create-url.dto';
 import { UrlService } from './urls.service';
 import { Session, type UserSession } from '@thallesp/nestjs-better-auth';
 import type { UUID } from 'crypto';
+import { VerifyAccessDTO } from './dto/verify-access.dto';
 
 @Controller({
   path: 'urls',
@@ -37,7 +38,19 @@ export class UrlController {
   @Get(':slug')
   async findTarget(@Param('slug') slug: string) {
     try {
-      return await this.urlService.getTarget(slug);
+      return await this.urlService.getAccess(slug);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  @Post(':slug')
+  async verifyAccess(
+    @Param('slug') slug: string,
+    @Body() verifyAccessDto: VerifyAccessDTO,
+  ) {
+    try {
+      return await this.urlService.getAccess(slug, verifyAccessDto.password);
     } catch (error) {
       throw new NotFoundException(error.message);
     }
