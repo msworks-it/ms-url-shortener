@@ -18,44 +18,51 @@ import { UrlService } from './urls.service';
 import { Session, type UserSession } from '@thallesp/nestjs-better-auth';
 import type { UUID } from 'crypto';
 
-@Controller('urls')
+@Controller({
+  path: 'urls',
+  version: ['1'],
+})
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
 
   @Get()
-  allUrls(@Query('userId', new ParseUUIDPipe()) userId: UUID) {
+  async allUrls(@Query('userId', new ParseUUIDPipe()) userId: UUID) {
     try {
-      return this.urlService.getAllUrls(userId); // insert pagination
+      return await this.urlService.getAllUrls(userId); // insert pagination
     } catch (error) {
       throw new NotFoundException(error.message);
     }
   }
 
   @Get(':slug')
-  findTarget(@Param('slug') slug: string) {
+  async findTarget(@Param('slug') slug: string) {
     try {
-      return this.urlService.getTarget(slug);
+      return await this.urlService.getTarget(slug);
     } catch (error) {
       throw new NotFoundException(error.message);
     }
   }
 
   @Post()
-  create(
+  async create(
     @Session() user: UserSession,
     @Body(new ValidationPipe()) createUrlDto: CreateUrlDTO,
   ) {
-    return this.urlService.createTarget(user.user.id, createUrlDto);
+    return await this.urlService.createTarget(user.user.id, createUrlDto);
   }
 
   @Put(':slug')
-  update(
+  async update(
     @Session() user: UserSession,
     @Param('slug') slug: string,
     @Body(new ValidationPipe()) updateUrlDto: CreateUrlDTO,
   ) {
     try {
-      return this.urlService.updateTarget(slug, user.user.id, updateUrlDto);
+      return await this.urlService.updateTarget(
+        slug,
+        user.user.id,
+        updateUrlDto,
+      );
     } catch (error) {
       throw new NotFoundException(error.message);
     }
@@ -63,9 +70,9 @@ export class UrlController {
 
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', new ParseUUIDPipe()) id: UUID) {
+  async remove(@Param('id', new ParseUUIDPipe()) id: UUID) {
     try {
-      return this.urlService.deleteTarget(id);
+      return await this.urlService.deleteTarget(id);
     } catch (error) {
       throw new NotFoundException(error.message);
     }
