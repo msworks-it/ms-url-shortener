@@ -1,9 +1,9 @@
 import { useForm } from "@tanstack/react-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function SignUp() {
   const form = useForm({
