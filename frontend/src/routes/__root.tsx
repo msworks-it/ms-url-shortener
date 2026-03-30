@@ -3,6 +3,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import '../styles.css'
+import { authClient } from '#/lib/auth-client'
 
 export const Route = createRootRoute({
   component: RootComponent,

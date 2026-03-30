@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
 
 export default function SignUp() {
   const form = useForm({
@@ -66,9 +67,9 @@ export default function SignUp() {
             </form.Field>
             <div className="pt-2 flex flex-col gap-2">
               <Button type="submit">Sign Up</Button>
-              <a href="/sign-in" className="text-sm text-gray-500 hover:text-gray-700">
+              <Link to="/sign-in" className="text-sm text-gray-500 hover:text-gray-700">
                 Already have an account? Sign in
-              </a>
+              </Link>
             </div>
           </div>
         </CardContent>
